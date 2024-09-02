@@ -19,21 +19,24 @@ with add_sys_path(path):
     from aero_model import configuration_data as parameters
 
 aero_controls = ['elevator', 'ailerons']
+propulsion_controls = ['throttle']
+
+vehicle_inputs = aero_controls + propulsion_controls
 
 # All data is given about c.g.
-r_cg = np.array([-2, 0, 0]) # center of gravity
+r_cg = np.array([-48.8, 0, 0]) # center of gravity
 
 # Propulsion data
 r_ref_propulsion = np.array([0, 0, 0])
 
 # Other mass properties
 density = 1.225
-mass = 128
-Ixx = 118.8
-Iyy = 56.9
-Izz = 172
+mass = 12800
+Ixx = 118800
+Iyy = 5690
+Izz = 17200
 Ixy = 0
-Ixz = 1
+Ixz = 0
 Iyz = 0
 inertia_matrix = [
     [Ixx, -Ixy, -Ixz],
