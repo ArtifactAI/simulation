@@ -2,9 +2,15 @@ import control as ct
 import numpy as np
 from scipy.spatial.transform import Rotation as R
 
+from ..configuration import propulsion_controls, parameters
+
 def calc_propulsion_dynamics(t, x, u, params):
+    print(u)
+    print(x)
     # u = throttle
-    return np.array([(1/thruster.time_constant) * (-x[index] + u[index]) for index, thruster in enumerate(params['thrusters'])])
+    xdot  = np.array([(1/thruster.time_constant) * (-x[index] + u[index]) for index, thruster in enumerate(params['thrusters'])])
+    print(xdot)
+    return xdot
 
 def calc_propulsion_outputs(t, x, u, params):
 
@@ -17,19 +23,16 @@ def calc_propulsion_outputs(t, x, u, params):
         thruster_force += thrust_vector
         thruster_moment += np.cross(thruster.position - params["r_cg"], thrust_vector)
         
+    
     return thruster_force, thruster_moment
 
 propulsion_state_inputs = []
-propulsion_control_inputs=['throttle_FL', 'throttle_FR', 'throttle_BL', 'throttle_BR', 'throttle_P']
+propulsion_control_inputs = propulsion_controls
 propulsion_inputs = propulsion_state_inputs + propulsion_control_inputs
 propulsion_outputs=['Fx_prop', 'Fy_prop', 'Fz_prop', 'Mx_prop', 'My_prop', 'Mz_prop']
 
-from .engines import *
-engines = {
-        'thrusters': [prop_front_left, prop_front_right, prop_rear_left, prop_rear_right, prop_pusher]
-}
-
-propulsion = ct.nlsys(updfcn=calc_propulsion_dynamics, outfcn=calc_propulsion_outputs, inputs=propulsion_inputs, outputs=propulsion_outputs, states=num_engines, params=engines, name='propulsion')
+num_engines = len(parameters['thrusters'])
+propulsion = ct.nlsys(updfcn=calc_propulsion_dynamics, outfcn=calc_propulsion_outputs, inputs=propulsion_inputs, outputs=propulsion_outputs, states=num_engines, name='propulsion')
 
 #
 # test propulsion subsystem

@@ -8,7 +8,6 @@ from ..configuration import aero_controls
 surfaces_dict = {}
 
 def calc_aerodynamics_outputs(t, x, u, params):
-
     airspeed = u[0]
     alpha = u[1]
     beta = u[2]

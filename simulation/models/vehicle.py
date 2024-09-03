@@ -10,10 +10,7 @@ from .airdata import airdata_calcs, airdata_outputs
 from .rigid_body import rigid_body_outputs
 from .forces_moments import forces_moments_outputs
 
-from configuration import aero_controls
-
-# vehicle_inputs = aerodynamics_control_inputs + propulsion_control_inputs
-vehicle_inputs = ['elevator', 'ailerons', 'throttle']
+vehicle_inputs = aerodynamics_control_inputs + propulsion_control_inputs
 vehicle_outputs = rigid_body_outputs + forces_moments_outputs + euler_angles_outputs + airdata_outputs
 
 vehicle = ct.interconnect(
