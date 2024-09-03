@@ -15,8 +15,6 @@ def solve_trim(system, initial_condition):
         elevator = vars[2]
         ailerons = 0
 
-        print('alpha', np.degrees(alpha))
-
         u = V*np.cos(alpha)
         w = V*np.sin(alpha)
         theta = alpha # assume level flight
@@ -26,10 +24,7 @@ def solve_trim(system, initial_condition):
         q1 = 0  # No roll
         q2 = np.sin(theta / 2)  # Pitch
         q3 = 0  # No yaw
-        
-        # alpha = np.radians(2)
-        # u = V*np.cos(alpha)
-        # w = V*np.sin(alpha)
+
         x = np.array([0, 0, z0, u, 0, w, q0, q1, q2, q3, 0, 0, 0, throttle])
         # x = np.array([0, 0, -1000, 100, 0, 5, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, throttle])
         xdot = system.dynamics(0, x, [elevator, ailerons, throttle], system.params)
@@ -45,6 +40,5 @@ def solve_trim(system, initial_condition):
               (np.radians(-29), np.radians(24))]  # Bounds for elevator
     initial_guess = [np.radians(5), .7, np.radians(0)]
     result = minimize(cost_function, initial_guess, method='L-BFGS-B', bounds=bounds, tol=1e-6)
-    print(result)
 
-    return result.x
+# TODO: evaluate quality of trim solution

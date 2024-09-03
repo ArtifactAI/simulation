@@ -3,61 +3,67 @@ import control as ct
 import matplotlib.pyplot as plt  # Add this import
 
 from .models.vehicle import vehicle
-from .configuration import parameters
+from .configuration import parameters, propulsion_controls, aero_controls
 from analysis.trim import solve_trim
 
 # Simulation parameters
-time = 30
-dt = 0.1  # Specify the time step
+time = 20
+dt = 0.1  
 
-throttle = 3
 vehicle.params = parameters
 
-trim_cond = solve_trim(vehicle, throttle)
-print('Trim V: ', trim_cond[0])
-print('Trim Alpha: ', np.degrees(trim_cond[1]))
-print('Trim Theta: ', np.degrees(trim_cond[2]))
+initial_condition = {
+    'altitude': 0,
+    'airspeed': 30,
+}
 
-V_trim = trim_cond[0]
-alpha_trim = trim_cond[1]
-theta_trim = trim_cond[2] + .05
+trim_condition = solve_trim(vehicle, initial_condition)
 
-q0 = np.cos(theta_trim / 2)
+trim_alpha = trim_condition[0]
+trim_throttle = trim_condition[1]
+trim_elevator = trim_condition[2]
+
+V = initial_condition['airspeed']
+alpha = trim_alpha + .01
+elevator = trim_elevator
+ailerons = 0
+throttle = trim_throttle
+
+u = V*np.cos(alpha)
+w = V*np.sin(alpha)
+
+theta = alpha
+
+q0 = np.cos(theta / 2)
 q1 = 0  # No roll
-q2 = np.sin(theta_trim / 2)  # Pitch
+q2 = np.sin(theta / 2)  # Pitch
 q3 = 0  # No yaw
 
-u0 = V_trim*np.cos(alpha_trim)
-w0 = V_trim*np.sin(alpha_trim)
-
 initial_state = {
-    'x': 0.0,  # Initial x position
-    'y': 0.0,  # Initial y position
-    'z': -1000,  # Initial z position
-    'u': u0,  # Initial body-frame x-axis velocity
-    'v': 0.0,  # Initial body-frame y-axis velocity
-    'w': w0,  # Initial body-frame z-axis velocity
-    'q0': q0, # Initial quaternion component (real part)
-    'q1': q1, # Initial quaternion component (i)
-    'q2': q2, # Initial quaternion component (j)
-    'q3': q3, # Initial quaternion component (k)
-    'p': 0.0,  # Initial roll rate
-    'q': 0.0,  # Initial pitch rate
-    'r': 0.0,   # Initial yaw rate
-    'prop_FL': 0, # Initial propeller FL
-    'prop_FR': 0, # Initial propeller FR
-    'prop_BL': 0, # Initial propeller BL
-    'prop_BR': 0, # Initial propeller BR
-    'prop_P': throttle, # Initial propeller P
+    'x': 0.0,
+    'y': 0.0, 
+    'z': 0,
+    'u': u,
+    'v': 0.0,
+    'w': w,
+    'q0': q0,
+    'q1': q1,
+    'q2': q2,
+    'q3': q3,
+    'p': 0.0,
+    'q': 0.0,
+    'r': 0.0,
+    'throttle': throttle
 }
 
 x0 = np.array([initial_state[key] for key in [
-    'x', 'y', 'z', 'u', 'v', 'w', 'q0', 'q1', 'q2', 'q3', 'p', 'q', 'r', 'prop_FL', 'prop_FR', 'prop_BL', 'prop_BR', 'prop_P'
-]])
+    'x', 'y', 'z', 'u', 'v', 'w', 'q0', 'q1', 'q2', 'q3', 'p', 'q', 'r'] + propulsion_controls])
 
 time_range = np.arange(0, time + dt, dt)
 
-timeseries = ct.input_output_response(vehicle, T=time_range, X0=x0, U=throttle)
+inputs = np.tile(np.array([elevator, ailerons, throttle]), (len(time_range), 1)).T
+
+timeseries = ct.input_output_response(vehicle, T=time_range, X0=x0, U=inputs)
 
 u = timeseries.inputs
 y = timeseries.outputs

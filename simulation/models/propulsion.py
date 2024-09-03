@@ -5,11 +5,8 @@ from scipy.spatial.transform import Rotation as R
 from ..configuration import propulsion_controls, parameters
 
 def calc_propulsion_dynamics(t, x, u, params):
-    print(u)
-    print(x)
     # u = throttle
     xdot  = np.array([(1/thruster.time_constant) * (-x[index] + u[index]) for index, thruster in enumerate(params['thrusters'])])
-    print(xdot)
     return xdot
 
 def calc_propulsion_outputs(t, x, u, params):
